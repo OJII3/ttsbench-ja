@@ -1,10 +1,10 @@
 # ttsbench-ja
 
-再現可能な日本語 ASR ベンチマークです。Parakeet の日本語モデルと faster-whisper の `large-v3-turbo` を、固定した音声、モデル revision、前処理、採点条件で比較します。
+再現可能な日本語 ASR ベンチマークです。FLEURS、JSUT Basic5000、TEDxJP-10K v1.1 で Parakeet 0.6B と faster-whisper `large-v3-turbo` を比較します。Parakeet 1.1B CTC も測定しましたが、今回の3データセットで0.6Bに精度・速度とも及ばなかったため、現在の実行対象から外しています。
 
 ## 比較条件
 
-- データセット: FLEURS `ja_jp/test`、JSUT Basic5000、Common Voice Japanese 27.0 `test`、TEDxJP-10K v1.1
+- 計測データセット: FLEURS `ja_jp/test`、JSUT Basic5000、TEDxJP-10K v1.1
 - 全音声を FFmpeg で mono / 16 kHz / PCM S16LE に変換し、変換済み音声を全モデルで共有
 - 初期プロンプト、hotword、外部言語モデル、VAD は使わない
 - 1 音声ずつ推論。NeMo はモデル既定のgreedyデコード・FP32、faster-whisper は CUDA FP16・beam size 5
@@ -12,7 +12,30 @@
 - 主指標は Unicode NFKC 後に空白と句読点を除いた CER。漢数字とアラビア数字は変換しない
 - 速度はモデル読み込み時間と音声ごとの推論時間を分けて保存。RTF は推論秒数 / 音声秒数
 
-各データセットとモデルの Hugging Face revision、split、評価設定は [`benchmarks/config.yaml`](benchmarks/config.yaml) に固定しています。音声、予測文、測定結果はローカルの `data/` と `results/` に保存し、Git には追加しません。
+各データセットと現行モデルの Hugging Face revision、split、評価設定は [`benchmarks/config.yaml`](benchmarks/config.yaml) に固定しています。音声と予測文はローカルの `data/` と `results/` に保存し、Git には追加しません。今回の測定条件と集計値は下記に記録しています。
+
+## ベンチマーク結果
+
+CERは低いほど認識精度が高く、RTFは低いほど高速です。p50は音声1件あたりの推論時間中央値、Peak VRAMは推論時のGPUメモリ最大使用量です。測定環境はNVIDIA RTX 3060 12GB、CUDAです。
+
+| データセット | 件数 | モデル | CER (%) | RTF | p50 (秒) | Peak VRAM (MB) |
+|---|---:|---|---:|---:|---:|---:|
+| FLEURS | 650 | faster-whisper large-v3-turbo | **4.995** | 0.0379 | 0.489 | 6,952 |
+| FLEURS | 650 | Parakeet 1.1B CTC（測定済・現行対象外） | 7.791 | 0.0080 | 0.103 | 4,762 |
+| FLEURS | 650 | Parakeet 0.6B CTC | 5.678 | **0.0044** | 0.057 | 3,068 |
+| FLEURS | 650 | Parakeet 0.6B TDT | 5.736 | 0.0053 | 0.067 | 3,068 |
+| JSUT Basic5000 | 5,000 | faster-whisper large-v3-turbo | 7.267 | 0.0907 | 0.432 | 6,622 |
+| JSUT Basic5000 | 5,000 | Parakeet 1.1B CTC（測定済・現行対象外） | 9.047 | 0.0138 | 0.062 | 4,432 |
+| JSUT Basic5000 | 5,000 | Parakeet 0.6B CTC | 6.701 | **0.0075** | **0.033** | 2,746 |
+| JSUT Basic5000 | 5,000 | Parakeet 0.6B TDT | **6.629** | 0.0087 | 0.038 | **2,646** |
+| TEDxJP-10K v1.1 | 8,949 | faster-whisper large-v3-turbo | 10.648 | 0.1297 | 0.413 | 6,592 |
+| TEDxJP-10K v1.1 | 8,949 | Parakeet 1.1B CTC（測定済・現行対象外） | 16.128 | 0.0183 | 0.060 | 4,402 |
+| TEDxJP-10K v1.1 | 8,949 | Parakeet 0.6B CTC | 9.638 | **0.0098** | **0.032** | 2,734 |
+| TEDxJP-10K v1.1 | 8,949 | Parakeet 0.6B TDT | **9.590** | 0.0110 | 0.036 | **2,734** |
+
+FLEURSではfaster-whisper、JSUTとTEDxではParakeet 0.6B TDTが最低CERでした。Parakeet 0.6BのTDTとCTCの精度差は最大でも0.072ポイントで、CTCは3データセットすべてでRTFが低くなりました。1.1B CTCは3データセットすべてで0.6BよりCERが高く、RTFも大きかったため、現行の `--model all` から外しています。
+
+TEDxJP-10KはYouTubeの273 URL中244本を取得し、公式手順で8,949発話（約7.94時間）に再構築しました。29本の取得失敗と字幕差分により、公式の約1万件より少なくなっています。Common Voice Japanese 27.0はMozilla Data Collectiveの認証が必要で、この環境では未取得・未計測です。
 
 ## 環境
 

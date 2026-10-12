@@ -61,12 +61,6 @@ models:
     revision: 44edb27eea9317daf89333e75eb830db4b1cc298
     checkpoint: parakeet-tdt_ctc-0.6b-ja.nemo
     decoder: ctc
-  parakeet_ctc_1_1b_ja:
-    backend: nemo
-    repo_id: grider-transwithai/parakeet-ctc-1.1b-ja
-    revision: 81b954e9d79da985572028fbe42a7e3c93313dfd
-    checkpoint: parakeet-ja.nemo
-    decoder: ctc
   faster_whisper_large_v3_turbo:
     backend: faster_whisper
     repo_id: mobiuslabsgmbh/faster-whisper-large-v3-turbo
