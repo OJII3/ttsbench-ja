@@ -1,0 +1,73 @@
+audio:
+  sample_rate: 16000
+  channels: 1
+  encoding: pcm_s16le
+  resampler: ffmpeg-libswresample-default
+
+normalization:
+  unicode: NFKC
+  remove_whitespace: true
+  remove_punctuation: true
+  normalize_numbers: false
+
+inference:
+  batch_size: 1
+  language: ja
+  task: transcribe
+  vad: false
+  initial_prompt: null
+  hotwords: null
+  warmup_examples: 1
+  precision:
+    nemo: float32
+    faster_whisper: float16
+  faster_whisper_beam_size: 5
+
+datasets:
+  fleurs:
+    source: huggingface
+    repo_id: google/fleurs
+    revision: 70bb2e84b976b7e960aa89f1c648e09c59f894dd
+    config: ja_jp
+    split: test
+  jsut_basic5000:
+    source: huggingface
+    repo_id: japanese-asr/ja_asr.jsut_basic5000
+    revision: 278db379fc96167ff2293d7abf9ab86976afcd78
+    split: test
+  common_voice_ja:
+    source: local_common_voice
+    version: cv-corpus-27.0-2026-09-11
+    split_file: test.tsv
+    required_path: data/raw/common-voice/cv-corpus-27.0-2026-09-11/ja
+    official_download: https://mozilladatacollective.com/datasets/cmu5xbhnf00fmnq07z9p3aa70
+  tedxjp10k:
+    source: local_tedxjp10k
+    version: 1.1
+    source_repo: https://github.com/laboroai/TEDxJP-10K
+    source_revision: 6147e131b165219947861da957789097a713407c
+    required_path: data/raw/TEDxJP-10K_v1.1
+
+models:
+  parakeet_tdt_ctc_0_6b_ja_tdt:
+    backend: nemo
+    repo_id: nvidia/parakeet-tdt_ctc-0.6b-ja
+    revision: 44edb27eea9317daf89333e75eb830db4b1cc298
+    checkpoint: parakeet-tdt_ctc-0.6b-ja.nemo
+    decoder: tdt
+  parakeet_tdt_ctc_0_6b_ja_ctc:
+    backend: nemo
+    repo_id: nvidia/parakeet-tdt_ctc-0.6b-ja
+    revision: 44edb27eea9317daf89333e75eb830db4b1cc298
+    checkpoint: parakeet-tdt_ctc-0.6b-ja.nemo
+    decoder: ctc
+  parakeet_ctc_1_1b_ja:
+    backend: nemo
+    repo_id: grider-transwithai/parakeet-ctc-1.1b-ja
+    revision: 81b954e9d79da985572028fbe42a7e3c93313dfd
+    checkpoint: parakeet-ja.nemo
+    decoder: ctc
+  faster_whisper_large_v3_turbo:
+    backend: faster_whisper
+    repo_id: mobiuslabsgmbh/faster-whisper-large-v3-turbo
+    revision: 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf

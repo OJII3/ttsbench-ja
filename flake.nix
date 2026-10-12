@@ -16,7 +16,17 @@
       ];
       perSystem = { pkgs, ... }: {
         devShells.default = pkgs.mkShell {
-          packages = [ pkgs.uv ];
+          packages = [
+            pkgs.ffmpeg
+            pkgs.sox
+            pkgs.uv
+            pkgs.yt-dlp
+          ];
+          shellHook = ''
+            ttsbench_python_site_packages="$PWD/.venv/lib/python3.10/site-packages"
+            export LD_LIBRARY_PATH="$ttsbench_python_site_packages/nvidia/cublas/lib:$ttsbench_python_site_packages/nvidia/cudnn/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            unset ttsbench_python_site_packages
+          '';
         };
       };
     };
