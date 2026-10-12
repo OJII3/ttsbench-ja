@@ -13,7 +13,7 @@ dependencies = [
   "numpy<2",
   "psutil>=7,<8",
   "pytorch-lightning>=2.2.1,<2.6",
-  "torch==2.6.0",
+  "torch==2.13.0",
   "nvidia-ml-py>=13,<14",
   "pyyaml>=6,<7",
   "soundfile>=0.13,<0.14",
