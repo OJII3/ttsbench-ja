@@ -102,7 +102,10 @@ def _load_model(
         from nemo.collections.asr.models import ASRModel
 
         torch.set_num_threads(1)
-        torch.set_num_interop_threads(1)
+        try:
+            torch.set_num_interop_threads(1)
+        except RuntimeError:
+            pass
         checkpoint = model_path / model_config["checkpoint"]
         model = ASRModel.restore_from(str(checkpoint), map_location=device)
         model.eval()
